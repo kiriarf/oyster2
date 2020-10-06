@@ -9,8 +9,7 @@ class Oystercard
   end
 
   def top_up(money)
-    raise "Card limit of #{CARD_LIMIT} exceeded." if (@balance + money) >= CARD_LIMIT
-    @balance += money
+    exceeded?(money) ? exceeded_error : @balance += money
   end
 
   def deduct(fare)
@@ -30,4 +29,11 @@ class Oystercard
     @in_use = false
   end
 
+  def exceeded?(money)
+    ((@balance + money) >= CARD_LIMIT )
+  end
+
+  def exceeded_error
+    raise "Card limit of #{CARD_LIMIT} exceeded."
+  end
 end
