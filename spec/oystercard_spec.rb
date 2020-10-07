@@ -1,9 +1,16 @@
 require 'oystercard'
 
 describe Oystercard do
+  let (:entry_station) { double :entry_station }
+  let (:exit_station) { double :exit_station}
+
   describe '#initialize' do
     it 'should have balance of 0 on initialization' do
       expect(subject.balance).to eq(0)
+    end
+
+    it 'should have an empty journeys array on initialization' do
+      expect(subject.journeys).to be_empty
     end
   end
 
@@ -16,8 +23,6 @@ describe Oystercard do
       expect { subject.top_up(100) }.to raise_error "Card limit of #{Oystercard::CARD_LIMIT} exceeded."
     end
   end
-  
-
 
   describe '#in_journey?' do
     it 'returns false on initialization' do
@@ -28,28 +33,41 @@ describe Oystercard do
   describe '#touch_in' do
     it 'changes value of in_use to true' do
       subject.top_up(1)
-      subject.touch_in
+      subject.touch_in(entry_station)
       expect(subject.in_journey?).to be true
     end
 
     it "raises an error if card balance too low" do
-      expect { subject.touch_in }.to raise_error("Balance too low.")
+      expect { subject.touch_in(entry_station) }.to raise_error("Balance too low.")
+    end
+
+    it "remembers the entry station" do
+      subject.top_up(5)
+      subject.touch_in(entry_station)
+      expect(subject.entry_station).to eq(entry_station)
     end
   end
   
+
   describe '#touch_out' do
     before do
       subject.top_up(5)
-      subject.touch_in
-    end
-
-    it 'changes the value of in_use to false' do
-      subject.touch_out
-      expect(subject.in_journey?).to be false
+      subject.touch_in(entry_station)
     end
 
     it 'reduces the @balance by minimum fare' do
-      expect { subject.touch_out }.to change{subject.balance}.by(-Oystercard::FARE)
+      expect { subject.touch_out(exit_station) }.to change{subject.balance}.by(-Oystercard::FARE)
     end
+
+    it 'changes entry_station to nil' do
+      subject.touch_out(exit_station)
+      expect(subject.entry_station).to eq(nil)
+    end
+
+    it 'creates a journey' do 
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to include({entry: entry_station, exit: exit_station})
+    end
+
   end
 end
