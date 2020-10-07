@@ -1,17 +1,22 @@
 require 'journey_log'
+describe JourneyLog do
 
-# describe JourneyLog do
-#   let(:journey) { double :journey }  
-#   describe '#initialize' do
-#     it 'has no journeys by default' do
-#       expect(subject.journeys).to be_empty
-#     end
-#   end 
+  let(:journey){ double :journey, entry_station: station, exit_station: station } #this may need to have some methods
+  let(:station){ double :station, name: "station", zone: "zone" }
+  let(:journey_class){double :journey_class, new: journey}
+  subject {described_class.new(journey_class: journey_class)}
 
-#   describe '#create_journey' do
-#     it 'creates a journey and adds to array' do
-#       subject.create(journey)
-#       expect(subject.journeys).to include(journey)
-#     end
-#   end
-# end
+  describe '#start' do
+    it 'starts a journey' do
+      
+      # expect(journey_class).to receive(:new).with(entry_station: station)
+      # subject.start(station)
+    end
+
+    it 'records a journey' do
+      allow(journey_class).to receive(:new).and_return journey
+      subject.start(station)
+      expect(subject.journeys).to include journey
+    end
+  end
+end
