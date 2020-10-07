@@ -2,7 +2,8 @@ require 'oystercard'
 
 describe Oystercard do
   let (:entry_station) { double :entry_station }
-  let (:exit_station) { double :exit_station}
+  let (:exit_station) { double :exit_station }
+  let (:journey) {double :journey, entry_station: entry_station, exit_station: exit_station}
 
   describe '#initialize' do
     it 'should have balance of 0 on initialization' do
@@ -56,7 +57,7 @@ describe Oystercard do
     end
 
     it 'reduces the @balance by minimum fare' do
-      expect { subject.touch_out(exit_station) }.to change{subject.balance}.by(-Oystercard::FARE)
+      expect { subject.touch_out(exit_station) }.to change{subject.balance}.by(-subject.journey_class::FARE)
     end
 
     it 'changes entry_station to nil' do
