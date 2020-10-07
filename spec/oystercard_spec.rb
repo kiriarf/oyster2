@@ -65,10 +65,5 @@ describe Oystercard do
       expect(subject.entry_station).to eq(nil)
     end
 
-    it 'creates a journey' do 
-      subject.touch_out(exit_station)
-      expect(subject.journeys).to include({entry: entry_station, exit: exit_station})
-    end
-
   end
 end

@@ -1,6 +1,5 @@
 class Oystercard
   CARD_LIMIT = 90
-  FARE = 1
   attr_reader :balance, :entry_station, :journeys, :journey_class
 
   def initialize(journey_class = Journey)
@@ -32,7 +31,7 @@ class Oystercard
   private
 
   def create_journey(exit_station)
-    @journeys << @journey_class.new(@entry_station, exit_station).current_journey
+    @journeys << @journey_class.new(@entry_station, exit_station)
   end
 
   def exceeded?(money)
