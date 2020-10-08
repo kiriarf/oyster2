@@ -1,69 +1,59 @@
 require 'oystercard'
+require 'journey'
 
 describe Oystercard do
-  let (:entry_station) { double :entry_station }
-  let (:exit_station) { double :exit_station }
-  let (:journey) {double :journey, entry_station: entry_station, exit_station: exit_station}
 
-  describe '#initialize' do
-    it 'should have balance of 0 on initialization' do
-      expect(subject.balance).to eq(0)
+subject(:oystercard) { described_class.new }
+subject(:journey) { instance_double("Journey") }
+let(:entry_station) { instance_double("Station") }
+let(:exit_station) { instance_double("Station") }
+let(:journey_log) { instance_double("JourneyLog") }
+
+
+  context "Freshly initialized card" do
+    it "has a balance of 0 by default" do
+      expect(oystercard.balance).to eq(0)
     end
 
-    it 'should have an empty journeys array on initialization' do
-      expect(subject.journeys).to be_empty
-    end
-  end
-
-  describe '#top_up' do
-    it 'adds to the balance of the card' do
-      expect { subject.top_up(5) }.to change{subject.balance}.by(5)
-    end
-
-    it 'raises an error if balance surpasses 90' do
-      expect { subject.top_up(100) }.to raise_error "Card limit of #{Oystercard::CARD_LIMIT} exceeded."
-    end
-  end
-
-  describe '#in_journey?' do
-    it 'returns false on initialization' do
-      expect(subject.in_journey?).to be false
-    end
-  end
-
-  describe '#touch_in' do
-    it 'changes value of in_use to true' do
-      subject.top_up(1)
-      subject.touch_in(entry_station)
-      expect(subject.in_journey?).to be true
-    end
-
-    it "raises an error if card balance too low" do
-      expect { subject.touch_in(entry_station) }.to raise_error("Balance too low.")
-    end
-
-    it "remembers the entry station" do
-      subject.top_up(5)
-      subject.touch_in(entry_station)
-      expect(subject.entry_station).to eq(entry_station)
-    end
-  end
-  
-
-  describe '#touch_out' do
-    before do
-      subject.top_up(5)
-      subject.touch_in(entry_station)
-    end
-
-    it 'reduces the @balance by minimum fare' do
-      expect { subject.touch_out(exit_station) }.to change{subject.balance}.by(-subject.journey_class::FARE)
-    end
-
-    it 'changes entry_station to nil' do
-      subject.touch_out(exit_station)
-      expect(subject.entry_station).to eq(nil)
+    it 'has an empty journey log' do
+      allow(journey_log).to receive(:journeys) { [] }
+      expect(oystercard.journey_log.journeys).to be_empty
     end
 
   end
+
+  context "#top_up" do
+    it "tops up the oystercard" do
+      expect{ oystercard.top_up(10) }.to change{ oystercard.balance }.by 10
+    end
+
+    it "raises error when top-up would go over max balance" do
+      message = "Card limit of #{ described_class::CARD_LIMIT } exceeded."
+      expect{ oystercard.top_up(described_class::CARD_LIMIT  + 1) }.to raise_error message
+    end
+  end
+
+  context '#deduct' do
+    it 'deducts a given amount' do
+      expect{ oystercard.deduct(15) }.to change{oystercard.balance}.by -15
+    end
+  end
+
+  context "#touch_in" do
+    context "with no funds" do
+      it "raises error" do
+        expect{ oystercard.touch_in(entry_station) }.to raise_error "Balance too low."
+      end
+    end
+  end
+
+  context '#touch_out' do
+    it 'calls #start on journey_log' do
+      oystercard.top_up(10)
+      oystercard.touch_in(entry_station)
+      allow(journey_log).to receive(:finish)
+      expect { oystercard.touch_out(exit_station) }.not_to raise_error
+    end
+  end
+
 end
