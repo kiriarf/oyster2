@@ -22,7 +22,7 @@ let(:journey_log) { instance_double("JourneyLog") }
 
   end
 
-  context "#top_up" do
+  describe "#top_up" do
     it "tops up the oystercard" do
       expect{ oystercard.top_up(10) }.to change{ oystercard.balance }.by 10
     end
@@ -33,13 +33,13 @@ let(:journey_log) { instance_double("JourneyLog") }
     end
   end
 
-  context '#deduct' do
+  describe '#deduct' do
     it 'deducts a given amount' do
       expect{ oystercard.deduct(15) }.to change{oystercard.balance}.by -15
     end
   end
 
-  context "#touch_in" do
+  describe "#touch_in" do
     context "with no funds" do
       it "raises error" do
         expect{ oystercard.touch_in(entry_station) }.to raise_error "Balance too low."
@@ -47,8 +47,10 @@ let(:journey_log) { instance_double("JourneyLog") }
     end
   end
 
-  context '#touch_out' do
+  describe '#touch_out' do
     it 'calls #start on journey_log' do
+      allow(entry_station).to receive(:zone).and_return(1)
+      allow(exit_station).to receive(:zone).and_return(3)
       oystercard.top_up(10)
       oystercard.touch_in(entry_station)
       allow(journey_log).to receive(:finish)

@@ -18,11 +18,18 @@ class Journey
   end
 
   def fare 
-    complete? ? FARE : PENALTY
+    complete? ? calculate_fare : PENALTY
   end
 
   def complete?
     @entry_station && @exit_station
   end
 
+  def calculate_fare
+    zone_difference == 0 ? FARE : FARE + zone_difference
+  end
+
+  def zone_difference
+    (@entry_station.zone - @exit_station.zone).abs
+  end
 end

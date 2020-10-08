@@ -11,13 +11,13 @@ describe JourneyLog do
     allow(oystercard).to receive(:deduct)
   end
 
-  context "#initialize" do
+  describe "#initialize" do
     it 'has an empty journeys array' do
       expect(journey_log.journeys).to be_empty
     end
   end
 
-  context '#start' do
+  describe '#start' do
     context 'with incomplete journey' do
       it 'does not err' do
         expect{journey_log.start(entry_station)}.not_to raise_error
@@ -25,8 +25,10 @@ describe JourneyLog do
     end
   end
 
-  context '#finish' do
+  describe '#finish' do
     it "deducts correct fare from balance" do
+      allow(entry_station).to receive(:zone).and_return(2)
+      allow(exit_station).to receive(:zone).and_return(2)
       journey_log.start(entry_station)
       expect { journey_log.finish(exit_station) }.not_to raise_error
     end
